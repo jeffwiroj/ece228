@@ -2,3 +2,4 @@ torch
 torchvision
 attrdict
 numpy
+adamp

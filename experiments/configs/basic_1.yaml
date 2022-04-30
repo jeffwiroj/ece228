@@ -9,5 +9,5 @@ lr_scale: 10 # Used only for pretrained, in case you want to downscale backbone 
 transf: # None or  "Basic"
 batch_size: 64
 epochs: 100
-mixup: False
+mixup: 0
     

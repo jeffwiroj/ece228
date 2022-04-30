@@ -1,13 +1,14 @@
-exp_name: "basic_0"
+exp_name: "mixup_1"
 optim:
     name: "adam"
-    lr: 0.001
+    lr: 0.0005
     wd: 0.000001
-sched: #scheduler; either None of cosine decay
+sched: "exp" #scheduler; either None or exp
 pretrained: False #True or False
 lr_scale: 10 # Used only for pretrained, in case you want to downscale backbone weight
-transf: # None or  "Basic"
-batch_size: 64
+transf: "basic" # None or  "basic"
+batch_size: 1024
 epochs: 100
-mixup: 0
+mixup: 0.3
+
     

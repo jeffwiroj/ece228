@@ -2,7 +2,7 @@ import sys
 import yaml
 import argparse
 sys.path.append('../')
-from utils.utils import get_config,ResNet,train_n_val,val
+from utils.utils import get_config,ResNet,train_n_val,val,train_val_mx
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
@@ -83,7 +83,7 @@ def main():
     if(config.optim.name == "adam"):
         optimizer = torch.optim.AdamW(params,weight_decay = config.optim.wd)
     elif(config.optim.name == "adamp"):
-         optimizer = AdamP(params, betas=(0.9, 0.999), weight_decay= config.optim.wd)
+         optimizer = AdamP(params, weight_decay= config.optim.wd)
     if(config.sched == "exp"):
         scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma = 0.97)
         print("Using Scheduler")
@@ -98,8 +98,12 @@ def main():
     best_acc = -float("inf")
     f =  open(f"results/{config.exp_name}.txt",'a', buffering = 1)
     for epoch in range (config.epochs):
-        t_loss,t_acc,v_loss,v_acc  = \
+        if(config.mixup == 0):
+            t_loss,t_acc,v_loss,v_acc  = \
             train_n_val(model,train_loader,val_loader,optimizer,criterion,scheduler = None,device = device)
+        else: t_loss,t_acc,v_loss,v_acc  = \
+              train_val_mx(model,train_loader,val_loader,optimizer,criterion,scheduler = None,device = device, mixup = config.mixup)
+              
         stats = {"train_loss":t_loss, "train_acc": t_acc, "val_loss":v_loss, "val_acc":v_acc}
         
         print(f"Epoch: {epoch}, train_loss:{t_loss}, train_acc: {t_acc}, val_loss: {v_loss}, val_acc: {v_acc}")
