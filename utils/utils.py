@@ -14,7 +14,7 @@ class ResNet(nn.Module):
     def __init__(self,num_class = 9,pretrained = False):
         super(ResNet,self).__init__()
         self.backbone = get_backbone(pretrained)
-        self.fc = nn.Linear(2048,num_class)
+        self.fc = nn.Linear(512,num_class)
     def forward(self,x):
         B = x.size(0)
         out = self.backbone(x).view(B,-1)
@@ -24,13 +24,16 @@ class ResNet(nn.Module):
 
 def get_backbone(pretrained = False):
     '''
-        Extracts Backbone of ResNet 50
+        Extracts Backbone of ResNet 18
         if pretrained = True, returns backbone pretrained using VicReg on ImageNet
                               else: return Resnet with Random weight
     '''
-    if(pretrained): backbone = torch.hub.load('facebookresearch/vicreg:main', 'resnet50')
+    if(pretrained): 
+        resnet = torchvision.models.resnet18(True)
+        backbone = torch.nn.Sequential(*(list(resnet.children())[:-1]))
+        #torch.hub.load('facebookresearch/vicreg:main', 'resnet50')
     else: 
-        resnet = torchvision.models.resnet50(False)
+        resnet = torchvision.models.resnet18(False)
         backbone = torch.nn.Sequential(*(list(resnet.children())[:-1]))
     return backbone
 

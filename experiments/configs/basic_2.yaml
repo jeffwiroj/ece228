@@ -1,13 +1,12 @@
 exp_name: "basic_2"
 optim:
     name: "adam"
-    lr: 0.001
-    wd: 0.00001
-sched: "exp" #scheduler; either None of cosine decay
+    lr: 0.0005
+    wd: 0.000001
+sched:  #scheduler
 pretrained: False #True or False
 lr_scale: 10 # Used only for pretrained, in case you want to downscale backbone weight
-transf: "basic" # None or  "basic"
-batch_size: 128
-epochs: 100
-mixup: 0
-    
+transf: "basic" #None or  "Basic"
+batch_size: 256
+epochs: 60
+mixup: 0.3

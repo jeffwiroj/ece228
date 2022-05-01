@@ -6,8 +6,8 @@ optim:
 sched: #scheduler; either None of cosine decay
 pretrained: False #True or False
 lr_scale: 10 # Used only for pretrained, in case you want to downscale backbone weight
-transf: # None or  "Basic"
-batch_size: 64
-epochs: 100
+transf: #None or  "Basic"
+batch_size: 256
+epochs: 80
 mixup: 0
     
