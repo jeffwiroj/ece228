@@ -110,6 +110,8 @@ def train_val_mx(model,train_loader,val_loader,optimizer,criterion,scheduler = N
     if(scheduler != None): scheduler.step()
     val_loss,val_acc = val(model,val_loader,criterion,device)
     return avg_loss, correct/total,val_loss,val_acc
+
+
 #Mixup Code from official Repo: https://github.com/facebookresearch/mixup-cifar10/blob/main/train.py
 def mixup_data(x, y, alpha=0.2):
     B = x.size(0)

@@ -92,6 +92,9 @@ def main():
     if not os.path.exists("results/weights"):
         print("Making weights folder")
         os.makedirs("results/weights")
+    if not os.path.exists("results/train"):
+        print("Making train result folder")
+        os.makedirs("results/train")
     
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     config = AttrDict(parse_cfg())
@@ -134,7 +137,7 @@ def main():
     
     
     best_acc = -float("inf")
-    f =  open(f"results/{config.exp_name}.txt",'a', buffering = 1)
+    f =  open(f"results/train/{config.exp_name}.txt",'a', buffering = 1)
     for epoch in range (config.epochs):
         if(config.mixup == 0):
             t_loss,t_acc,v_loss,v_acc  = \
