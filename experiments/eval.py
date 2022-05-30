@@ -15,7 +15,7 @@ import os
 import json
 import random
 import numpy as np
-
+import torchmetrics
 
 
 def parse_cfg():
@@ -52,7 +52,7 @@ def evaluate(config,model,criterion,device,corruption = "bright"):
     
     accuracies = []
     if(corruption == "bright"):
-        scales = [0.8,0.9,1.1,1.2]
+        scales = [0.8,0.9,1.0,1.1,1.2]
     if(corruption == "blur"):
         scales = [0.3,0.5,0.7,0.9]
         
@@ -70,10 +70,10 @@ def evaluate(config,model,criterion,device,corruption = "bright"):
                          T.Normalize(mean=d.mean,std=d.std)]) 
         test_dataset = pathDataset(root_dir = "../data",split = "test",transform = val_transform)
         test_loader = DataLoader(test_dataset,batch_size = config.batch_size,shuffle = True, pin_memory = True)
-        _, test_acc = val(model,test_loader,criterion,device = device)
+        _, test_acc,rms = val(model,test_loader,criterion,device = device,compute_rmse = True)
         
         accuracies.append(test_acc)
-        stats[corruption].append((scale,test_acc))
+        stats[corruption].append((scale,test_acc,rms))
         
     print(json.dumps(stats),file = f)
         
@@ -114,7 +114,7 @@ def main():
     for corruption in corruptions:
         criterion = nn.CrossEntropyLoss()
         acc,accs = evaluate(config,model,criterion,device,corruption)
-        print(f"Corruption: {corruption}, Mean Acc: {acc}")
+        #print(f"Corruption: {corruption}, Mean Acc: {acc}")
 if __name__ == "__main__":
     main()
 

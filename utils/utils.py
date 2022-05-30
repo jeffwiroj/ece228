@@ -3,6 +3,7 @@ import torch.nn as nn
 import torchvision
 import yaml
 import numpy as np
+import torchmetrics
 
 def get_config(path):
     with open(path,"r") as file:
@@ -37,13 +38,14 @@ def get_backbone(pretrained = False):
         backbone = torch.nn.Sequential(*(list(resnet.children())[:-1]))
     return backbone
 
-def val(model,dataloader,criterion,device = "cpu"):
+def val(model,dataloader,criterion,device = "cpu",compute_rmse = False):
     
     model.eval() # Put in Eval Mode
     model = model.to(device)
-    
+    metric = torchmetrics.CalibrationError(norm = 'l2',n_bins = 10)
     total,correct = 0,0
     avg_loss = 0
+    rmse = 0
     with torch.no_grad():
         for x,y in dataloader:
 
@@ -51,14 +53,19 @@ def val(model,dataloader,criterion,device = "cpu"):
             x,y = x.to(device),y.view(B).long().to(device)
             logits = model(x)
             preds = torch.argmax(logits,1)
-
+            
             loss = criterion(logits,y)
             avg_loss += (loss.item() / len(dataloader))
             total += B
             correct += (preds == y).sum().item()
+            
+            if(compute_rmse):
+                probs = torch.softmax(logits,1)
+                metric.update(probs.detach().cpu(),y.detach().cpu())
  
     model.train()
-    return avg_loss, (correct/total)
+    if(not compute_rmse): return avg_loss, (correct/total)
+    return avg_loss, (correct/total), metric.compute().detach().item()
 
 
 def train_n_val(model,train_loader,val_loader,optimizer,criterion,scheduler = None,device = "cpu"):
@@ -81,7 +88,7 @@ def train_n_val(model,train_loader,val_loader,optimizer,criterion,scheduler = No
         
         optimizer.zero_grad()
     if(scheduler != None): scheduler.step()
-    val_loss,val_acc = val(model,val_loader,criterion,device)
+    val_loss,val_acc = val(model,val_loader,criterion,device,False)
     return avg_loss, correct/total,val_loss,val_acc
 
 def train_val_mx(model,train_loader,val_loader,optimizer,criterion,scheduler = None,device = "cpu", mixup = 0.2):
@@ -108,7 +115,7 @@ def train_val_mx(model,train_loader,val_loader,optimizer,criterion,scheduler = N
         optimizer.zero_grad()
         
     if(scheduler != None): scheduler.step()
-    val_loss,val_acc = val(model,val_loader,criterion,device)
+    val_loss,val_acc = val(model,val_loader,criterion,device,False)
     return avg_loss, correct/total,val_loss,val_acc
 
 
